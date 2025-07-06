@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>College GPT</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #000;
+      overflow: hidden;
+      color: white;
+    }
+
+    canvas#backgroundCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: -2;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    .ui {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      padding: 40px;
+      pointer-events: none;
+    }
+
+    header {
+      position: absolute;
+      top: 20px;
+      left: 40px;
+      font-size: 2rem;
+      font-weight: bold;
+      pointer-events: auto;
+    }
+
+    .logo .c {
+      color: #00ffff;
+    }
+    .logo .gpt {
+      color: #fff;
+    }
+    .subtitle {
+      font-size: 0.8rem;
+      color: #aaa;
+      margin-left: 8px;
+    }
+
+    main {
+      flex: 1;
+      max-width: 800px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      height: 100%;
+      pointer-events: auto;
+    }
+
+    .chatbox {
+      flex: 1;
+      max-height: 60vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 10px;
+      margin-bottom: 20px;
+    }
+
+    .bubble {
+      padding: 10px 16px;
+      border-radius: 20px;
+      max-width: 60%;
+      font-size: 0.95rem;
+      backdrop-filter: blur(10px);
+      color: white;
+      line-height: 1.4;
+      word-wrap: break-word;
+    }
+
+    .bubble.user {
+      background: rgba(0, 255, 255, 0.15);
+      align-self: flex-end;
+    }
+
+    .bubble.bot {
+      background: rgba(255, 255, 255, 0.08);
+      align-self: flex-start;
+    }
+
+    .input-box {
+      display: flex;
+      gap: 12px;
+      backdrop-filter: blur(12px);
+      background: rgba(255, 255, 255, 0.05);
+      padding: 12px 20px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 0 12px rgba(0, 255, 255, 0.15);
+    }
+
+    .input-box input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #fff;
+      font-size: 1rem;
+      flex: 1;
+    }
+
+    .input-box button {
+      background: #00ffff;
+      border: none;
+      border-radius: 50%;
+      color: black;
+      font-weight: bold;
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .input-box button:hover {
+      background: #66ffff;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="backgroundCanvas"></canvas>
+  <div class="ui">
+    <header>
+      <div class="logo"><span class="c">C</span><span class="gpt">GPT</span><span class="subtitle">College GPT</span></div>
+    </header>
+    <main>
+      <div class="chatbox" id="chatbox"></div>
+      <div class="input-box">
+        <input id="userInput" type="text" placeholder="Type your message..." />
+        <button onclick="sendMessage()">&#10148;</button>
+      </div>
+    </main>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script>
+    const canvas = document.getElementById("backgroundCanvas");
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.z = 50;
+
+    const sphereGeometry = new THREE.SphereGeometry(10, 64, 64);
+    const sphereMaterial = new THREE.MeshPhysicalMaterial({
+      color: 0x00ffff, // Cyan
+      transmission: 1.0,
+      transparent: true,
+      opacity: 0.6,
+      roughness: 0.1,
+      metalness: 0.1,
+      clearcoat: 1,
+      clearcoatRoughness: 0.1,
+      reflectivity: 0.9,
+    });
+    const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+    sphere.position.set(0, 0, 0);
+    scene.add(sphere);
+
+    const outerGlow = new THREE.Mesh(
+      new THREE.SphereGeometry(10.6, 64, 64),
+      new THREE.MeshBasicMaterial({
+        color: 0x00ffff,
+        transparent: true,
+        opacity: 0.15,
+        blending: THREE.AdditiveBlending,
+        side: THREE.BackSide
+      })
+    );
+    scene.add(outerGlow);
+
+    const innerGlow = new THREE.Mesh(
+      new THREE.SphereGeometry(10.2, 64, 64),
+      new THREE.MeshBasicMaterial({
+        color: 0x66ccff,
+        transparent: true,
+        opacity: 0.3,
+        blending: THREE.AdditiveBlending,
+        side: THREE.BackSide
+      })
+    );
+    scene.add(innerGlow);
+
+    const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+    scene.add(ambient);
+
+    const pointLight = new THREE.PointLight(0x00ffff, 2, 300);
+    pointLight.position.set(60, 60, 80);
+    scene.add(pointLight);
+
+    const clock = new THREE.Clock();
+    function animate() {
+      requestAnimationFrame(animate);
+      const t = clock.getElapsedTime();
+
+      sphere.position.y = Math.sin(t * 2.0) * 2; // Smooth vertical float
+      sphere.rotation.y += 0.002;
+
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener("resize", () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    function sendMessage() {
+      const input = document.getElementById("userInput");
+      const value = input.value.trim();
+      if (!value) return;
+
+      const chatbox = document.getElementById("chatbox");
+      const userBubble = document.createElement("div");
+      userBubble.className = "bubble user";
+      userBubble.textContent = value;
+      chatbox.appendChild(userBubble);
+
+      const botBubble = document.createElement("div");
+      botBubble.className = "bubble bot";
+      botBubble.textContent = "";
+      chatbox.appendChild(botBubble);
+      input.value = "";
+
+      let i = 0;
+      const reply = `You said: \"${value}\" (simulated)`;
+      const type = setInterval(() => {
+        botBubble.textContent += reply[i++];
+        chatbox.scrollTop = chatbox.scrollHeight;
+        if (i >= reply.length) clearInterval(type);
+      }, 25);
+
+      chatbox.scrollTop = chatbox.scrollHeight;
+    }
+  </script>
+</body>
+</html>
