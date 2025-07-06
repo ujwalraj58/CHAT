@@ -1,82 +1,83 @@
 body {
   margin: 0;
   font-family: 'Segoe UI', sans-serif;
-  background-color: #111;
-  color: white;
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
+  background: #0d1117;
+  color: #e6edf3;
 }
 
-.container {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
+.ui {
+  max-width: 700px;
+  margin: auto;
   padding: 20px;
 }
 
-header {
-  font-size: 1.5rem;
-  margin-bottom: 15px;
+.logo {
+  font-size: 24px;
   font-weight: bold;
-  color: #00ffff;
 }
 
-#chatbox {
-  flex-grow: 1;
+.chatbox {
+  border: 1px solid #444;
+  border-radius: 10px;
+  padding: 10px;
+  height: 400px;
   overflow-y: auto;
-  padding-right: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  background: #161b22;
+  margin-bottom: 10px;
 }
 
 .bubble {
+  margin: 8px 0;
   padding: 10px 14px;
-  border-radius: 12px;
-  max-width: 70%;
-  font-size: 0.95rem;
-  line-height: 1.5;
-  word-wrap: break-word;
+  border-radius: 20px;
+  max-width: 80%;
 }
 
-.bubble.user {
-  background-color: #00ffff22;
+.user {
+  background-color: #238636;
   align-self: flex-end;
+  margin-left: auto;
 }
 
-.bubble.bot {
-  background-color: #ffffff0f;
+.bot {
+  background-color: #444c56;
   align-self: flex-start;
+  margin-right: auto;
 }
 
-.input-area {
+.input-box {
   display: flex;
-  margin-top: 10px;
+  align-items: center;
+  gap: 10px;
 }
 
-.input-area input {
+input[type="text"] {
   flex: 1;
   padding: 10px;
-  font-size: 1rem;
+  border-radius: 20px;
   border: none;
   outline: none;
-  border-radius: 8px 0 0 8px;
-  background-color: #222;
+  background: #21262d;
   color: white;
 }
 
-.input-area button {
-  padding: 0 16px;
-  font-size: 1.2rem;
-  background: #00ffff;
-  color: black;
+button {
+  background: none;
   border: none;
-  border-radius: 0 8px 8px 0;
   cursor: pointer;
-  transition: background 0.2s;
+  color: white;
 }
 
-.input-area button:hover {
-  background: #66ffff;
+button:hover svg {
+  fill: #58a6ff;
+}
+
+#listeningIndicator {
+  color: #f0ad4e;
+  margin-left: 10px;
+  font-size: 14px;
+}
+
+.hidden {
+  display: none;
 }
