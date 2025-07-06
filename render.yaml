@@ -2,8 +2,7 @@ services:
   - type: web
     name: chatbot
     env: python
-    plan: free
-    buildCommand: cd backend && pip install -r requirements.txt
+    buildCommand: pip install -r requirements.txt
     startCommand: gunicorn backend.wsgi:application
     envVars:
       - key: DEBUG
