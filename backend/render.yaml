@@ -3,7 +3,7 @@ services:
     name: chatbot
     env: python
     plan: free
-    buildCommand: pip install -r requirements.txt
+    buildCommand: cd backend && pip install -r requirements.txt
     startCommand: gunicorn backend.wsgi:application
     envVars:
       - key: DEBUG
@@ -12,3 +12,5 @@ services:
         generateValue: true
       - key: OPENAI_API_KEY
         sync: false
+      - key: DJANGO_SETTINGS_MODULE
+        value: backend.settings
